@@ -36,8 +36,8 @@ public class SwaggerConfig {
      * Metodo en el cual se detalla la informacion generia que se quiere mostrar del swagger
      */
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("Máster en Ingeniería Web (UPM). FENW. Items")
-                .description("Swagger de Items. https://github.com/miw-upm/FENW-items")
+        return new ApiInfoBuilder().title("Máster en Ingeniería Web. Universidad Politécnica de Madrid")
+                .description("FENW. Front-end para Navegadores Web. Items. https://github.com/miw-upm/FENW-items")
                 .version("1.1.0").build();
     }
 
