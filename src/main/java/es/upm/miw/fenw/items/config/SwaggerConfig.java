@@ -15,7 +15,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 /*
  * CLASE DE  CONFIGURACION PARA  EL SWAGGER
  * 
- * URL DEL SWAGGER:  http://localhost:8080/SPRING.tpv.1.2.0-SNAPSHOT/api/swagger-ui.html
+ * URL DEL SWAGGER:  http://localhost:8080/../swagger-ui.html
  */
 
 @Configuration
@@ -37,8 +37,7 @@ public class SwaggerConfig {
      */
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder().title("Máster en Ingeniería Web. Universidad Politécnica de Madrid")
-                .description("FENW. Front-end para Navegadores Web. Items. https://github.com/miw-upm/FENW-items")
-                .version("1.1.0").build();
+                .description("FENW. Front-end para Navegadores Web. Items. https://github.com/miw-upm/FENW-items").build();
     }
 
 }
