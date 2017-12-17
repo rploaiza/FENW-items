@@ -19,8 +19,10 @@
 
 ### Ejecutar el jar
 1. Bajarse la última [Release (*.jar)](https://github.com/miw-upm/FENW-items/releases)
-1. En consola, en la ruta del jar, ejercutar: `java -jar BETCA-items-1.x.0.jar`
+1. En consola, en la ruta del jar, ejercutar: `java -jar FENW-items-1.x.0.jar`
 
+### Swagger
+[Cliente Swagger: http://localhost:8080/api/v0/swagger-ui.html](http://localhost:8080/api/v0/swagger-ui.html)
 ### Documentación
 #### Mensajes de error
 Ejemplo: `{"exception":"ItemIdNotFoundException", "message":"Id de item no encontrado. 881", "path":"/api/v0/items/881"}`
