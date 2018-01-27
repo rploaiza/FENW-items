@@ -1,4 +1,4 @@
-package es.upm.miw.betca.items;
+package es.upm.miw.fenw.items;
 
 import static org.junit.Assert.assertEquals;
 
@@ -8,21 +8,34 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import es.upm.miw.fenw.items.dtos.ItemDto;
 import es.upm.miw.fenw.items.resources.ItemResource;
 
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@TestPropertySource(locations = "classpath:test.properties")
 public class ItemResourceFunctionalTesting {
-
-    private static final String SERVER_URL = "http://localhost:8080/api/v0/";
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
+    @Value("${local.server.port}")
+    private int port;
+
+    @Value("${server.contextPath}")
+    private String contextPath;
+
     private int createItem(String name) {
         ItemDto itemDto = new ItemDto(name, name + "...");
-        return new RestBuilder<Integer>(SERVER_URL).path(ItemResource.ITEMS).body(itemDto).clazz(Integer.class).post().build();
+        return new RestBuilder<Integer>(port).path(contextPath).path(ItemResource.ITEMS).body(itemDto).clazz(Integer.class).post().build();
     }
 
     private int createItem() {
@@ -32,10 +45,10 @@ public class ItemResourceFunctionalTesting {
     @Test
     public void testReadItems() {
         List<ItemDto> itemDtoList = Arrays
-                .asList(new RestBuilder<ItemDto[]>(SERVER_URL).path(ItemResource.ITEMS).clazz(ItemDto[].class).get().build());
+                .asList(new RestBuilder<ItemDto[]>(port).path(contextPath).path(ItemResource.ITEMS).clazz(ItemDto[].class).get().build());
         assertEquals(0, itemDtoList.size());
         int id = this.createItem();
-        itemDtoList = Arrays.asList(new RestBuilder<ItemDto[]>(SERVER_URL).path(ItemResource.ITEMS).clazz(ItemDto[].class).get().build());
+        itemDtoList = Arrays.asList(new RestBuilder<ItemDto[]>(port).path(contextPath).path(ItemResource.ITEMS).clazz(ItemDto[].class).get().build());
         assertEquals(1, itemDtoList.size());
         this.deleteItem(id);
     }
@@ -45,7 +58,7 @@ public class ItemResourceFunctionalTesting {
         int id = this.createItem();
         int id2 = this.createItem("dos");
         List<ItemDto> itemDtoList = Arrays.asList(
-                new RestBuilder<ItemDto[]>(SERVER_URL).path(ItemResource.ITEMS).param("name", "uno").clazz(ItemDto[].class).get().build());
+                new RestBuilder<ItemDto[]>(port).path(contextPath).path(ItemResource.ITEMS).param("name", "uno").clazz(ItemDto[].class).get().build());
         assertEquals(1, itemDtoList.size());
         this.deleteItem(id);
         this.deleteItem(id2);
@@ -54,7 +67,7 @@ public class ItemResourceFunctionalTesting {
     @Test
     public void testReadItem() {
         int id = this.createItem();
-        ItemDto itemDto = new RestBuilder<ItemDto>(SERVER_URL).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id)
+        ItemDto itemDto = new RestBuilder<ItemDto>(port).path(contextPath).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id)
                 .clazz(ItemDto.class).get().build();
         assertEquals("uno", itemDto.getName());
         assertEquals("uno...", itemDto.getDescription());
@@ -64,14 +77,14 @@ public class ItemResourceFunctionalTesting {
     @Test
     public void testReadItemWithNonExistentItem() {
         thrown.expect(new HttpMatcher(HttpStatus.NOT_FOUND));
-        new RestBuilder<Object>(SERVER_URL).path(ItemResource.ITEMS).path(ItemResource.ID).expand(666).get().build();
+        new RestBuilder<Object>(port).path(contextPath).path(ItemResource.ITEMS).path(ItemResource.ID).expand(666).get().build();
     }
 
     @Test
     public void putItem() {
         int id = this.createItem();
         ItemDto itemDto = new ItemDto("uno bis", "uno... bis");
-        itemDto = new RestBuilder<ItemDto>(SERVER_URL).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).body(itemDto)
+        itemDto = new RestBuilder<ItemDto>(port).path(contextPath).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).body(itemDto)
                 .clazz(ItemDto.class).put().build();
         assertEquals("uno bis", itemDto.getName());
         assertEquals("uno... bis", itemDto.getDescription());
@@ -82,7 +95,7 @@ public class ItemResourceFunctionalTesting {
     public void patchItem() {
         int id = this.createItem();
         ItemDto itemDto = new ItemDto("uno NOT bis", "uno... bis");
-        itemDto = new RestBuilder<ItemDto>(SERVER_URL).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).body(itemDto)
+        itemDto = new RestBuilder<ItemDto>(port).path(contextPath).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).body(itemDto)
                 .clazz(ItemDto.class).patch().build();
         assertEquals("uno", itemDto.getName());
         assertEquals("uno... bis", itemDto.getDescription());
@@ -95,7 +108,7 @@ public class ItemResourceFunctionalTesting {
     }
 
     private void deleteItem(int id) {
-        new RestBuilder<Object>(SERVER_URL).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).delete().build();
+        new RestBuilder<Object>(port).path(contextPath).path(ItemResource.ITEMS).path(ItemResource.ID).expand(id).delete().build();
     }
 
 }

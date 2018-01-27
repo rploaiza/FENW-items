@@ -18,7 +18,7 @@ import es.upm.miw.fenw.items.resources.exceptions.ItemIdNotFoundException;
 @RequestMapping(ItemResource.ITEMS)
 public class ItemResource {
 
-    public static final String ITEMS = "items";
+    public static final String ITEMS = "/items";
     
     public static final String ID = "/{id}";
 

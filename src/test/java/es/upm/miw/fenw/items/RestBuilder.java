@@ -1,4 +1,4 @@
-package es.upm.miw.betca.items;
+package es.upm.miw.fenw.items;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -8,10 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.DefaultResponseErrorHandler;
@@ -23,7 +25,11 @@ public class RestBuilder<T> {
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    private String uri;
+    private String serverUri;
+
+    private int port;
+
+    private String path;
 
     private List<Object> expandList;
 
@@ -39,39 +45,50 @@ public class RestBuilder<T> {
 
     private HttpMethod method;
 
-    public RestBuilder(String serverUri) {
+    private boolean log;
+
+    public RestBuilder(String serverUri, int port) {
         restTemplate.setRequestFactory(new HttpComponentsClientHttpRequestFactory());
-        this.uri = serverUri;
+        this.serverUri = serverUri;
+        this.port = port;
+        this.path = "";
         this.expandList = new ArrayList<>();
         headerValues = new HashMap<>();
         params = new HttpHeaders();
+        log = false;
+    }
+
+    public RestBuilder() {
+        this("http://localhost", 8080);
+    }
+
+    public RestBuilder(int port) {
+        this("http://localhost", port);
+    }
+
+    public RestBuilder(String serverUri) {
+        this(serverUri, 8080);
+    }
+
+    public RestBuilder<T> port(int port) {
+        this.port = port;
+        return this;
     }
 
     public RestBuilder<T> path(String path) {
-        this.uri = this.uri + path;
+        this.path = this.path + path;
         return this;
     }
 
     public RestBuilder<T> expand(Object... values) {
-       for (Object value : values) {
+        for (Object value : values) {
             this.expandList.add(value);
         }
         return this;
     }
 
-    public RestBuilder<T> pathId(int path) {
-        this.uri = this.uri + "/" + path;
-        return this;
-    }
-
-    public RestBuilder<T> pathId(String path) {
-        this.uri = this.uri + "/" + path;
-        return this;
-    }
-
-    public RestBuilder<T> authorization(String authorizationValue) {
-        this.authorization = authorizationValue;
-        return this;
+    public RestBuilder<T> basicAuth(String token) {
+        return basicAuth(token, "");
     }
 
     public RestBuilder<T> basicAuth(String nick, String pass) {
@@ -125,9 +142,9 @@ public class RestBuilder<T> {
     private URI uri() {
         UriComponents uriComponents;
         if (params.isEmpty()) {
-            uriComponents = UriComponentsBuilder.fromHttpUrl(uri).build();
+            uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).build();
         } else {
-            uriComponents = UriComponentsBuilder.fromHttpUrl(uri).queryParams(params).build();
+            uriComponents = UriComponentsBuilder.fromHttpUrl(serverUri + ":" + port + path).queryParams(params).build();
         }
         if (!expandList.isEmpty()) {
             uriComponents = uriComponents.expand(expandList.toArray());
@@ -136,11 +153,30 @@ public class RestBuilder<T> {
 
     }
 
+    public RestBuilder<T> log() {
+        this.log = true;
+        return this;
+    }
+
     public T build() {
+        ResponseEntity<T> response;
+        if (log) {
+            Logger.getLogger(this.getClass()).info(method + " " + this.path + this.headers() + "{" + this.body + "}");
+        }
         if (body != null && !method.equals(HttpMethod.GET)) {
-            return restTemplate.exchange(this.uri(), method, new HttpEntity<Object>(body, this.headers()), clazz).getBody();
+            response = restTemplate.exchange(this.uri(), method, new HttpEntity<Object>(body, this.headers()), clazz);
+            if (log) {
+                Logger.getLogger(this.getClass())
+                        .info(response.getStatusCode() + "==" + response.getHeaders());
+            }
+            return response.getBody();
         } else {
-            return restTemplate.exchange(this.uri(), method, new HttpEntity<Object>(this.headers()), clazz).getBody();
+            response = restTemplate.exchange(this.uri(), method, new HttpEntity<Object>(this.headers()), clazz);
+            if (log) {
+                Logger.getLogger(this.getClass())
+                        .info(response.getStatusCode() + "==" + response.getHeaders());
+            }
+            return response.getBody();
         }
     }
 
