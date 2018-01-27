@@ -1,12 +1,22 @@
 package es.upm.miw.fenw.items.entities;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+
+@Entity
 public class Item {
 
+    @Id
+    @GeneratedValue
     private int id;
 
     private String name;
 
     private String description;
+
+    public Item() {
+    }
 
     public Item(String name, String description) {
         this.name = name;
@@ -36,5 +46,29 @@ public class Item {
     public void setDescription(String description) {
         this.description = description;
     }
-    
+
+    @Override
+    public int hashCode() {
+        return this.id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        return id == ((Item) obj).id;
+    }
+
+    @Override
+    public String toString() {
+        return "Item [id=" + id + ", name=" + name + ", description=" + description + "]";
+    }
+
 }
