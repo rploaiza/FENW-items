@@ -16,6 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig {
 
+    // http://localhost:8080/api/v0/swagger-ui.html
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("Máster en Ingeniería Web. Universidad Politécnica de Madrid")
