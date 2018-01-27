@@ -54,7 +54,6 @@ public class ItemController {
     public void deleteItem(int id) {
         if (itemDao.exists(id)) {
             itemDao.delete(id);
-
         }
     }
 
